@@ -1,0 +1,74 @@
+version: '3.8'
+
+services:
+  zookeeper:
+    image: wurstmeister/zookeeper
+    container_name: kafka-zookeeper
+    ports:
+      - "2181:2181"
+    networks:
+      - eeo-net
+  kafka-01:
+    image: wurstmeister/kafka:2.12-2.4.0
+    container_name: kafka-kafka-01
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_LOG_DIRS: /kafka/logs
+      KAFKA_LISTENERS: PLAINTEXT://kafka-01:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-01:9092
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+    volumes:
+      - kafkadata1:/kafka
+    networks:
+      - eeo-net
+    depends_on:
+      - zookeeper
+  kafka-02:
+    image: wurstmeister/kafka:2.12-2.4.0
+    container_name: kafka-kafka-02
+    ports:
+      - "9093:9093"
+    environment:
+      KAFKA_BROKER_ID: 2
+      KAFKA_LOG_DIRS: /kafka/logs
+      KAFKA_LISTENERS: PLAINTEXT://kafka-02:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-02:9093
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+    volumes:
+      - kafkadata2:/kafka
+    networks:
+      - eeo-net
+    depends_on:
+      - zookeeper
+  kafka-03:
+    image: wurstmeister/kafka:2.12-2.4.0
+    container_name: kafka-kafka-03
+    ports:
+      - "9094:9094"
+    environment:
+      KAFKA_BROKER_ID: 3
+      KAFKA_LOG_DIRS: /kafka/logs
+      KAFKA_LISTENERS: PLAINTEXT://kafka-03:9094 
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-03:9094
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+    volumes:
+      - kafkadata3:/kafka
+    networks:
+      - eeo-net
+    depends_on:
+      - zookeeper
+
+volumes:
+  kafkadata1:
+    driver: local
+  kafkadata2:
+    driver: local
+  kafkadata3:
+    driver: local
+
+networks:
+  eeo-net:
+    driver: bridge
+    name: eeo-net

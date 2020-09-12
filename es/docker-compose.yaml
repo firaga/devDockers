@@ -1,0 +1,76 @@
+version: '2.2'
+services:
+  cerebro:
+    image: lmenezes/cerebro:0.8.3
+    container_name: cerebro
+    ports:
+      - "9000:9000"
+    command:
+      - -Dhosts.0.host=http://elasticsearch:9200
+    networks:
+      - es74net
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.4.2
+    container_name: kibana74
+    environment:
+      - I18N_LOCALE=zh-CN
+      - XPACK_GRAPH_ENABLED=true
+      - TIMELION_ENABLED=true
+      - XPACK_MONITORING_COLLECTION_ENABLED="true"
+    ports:
+      - "5601:5601"
+    networks:
+      - es74net
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.4.2
+    container_name: es74_01
+    environment:
+      - cluster.name=geektime
+      - node.name=es74_01
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - discovery.seed_hosts=es74_01,es74_02
+      #- network.publish_host=elasticsearch
+      - cluster.initial_master_nodes=es74_01,es74_02
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - es74data1:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+    networks:
+      - es74net
+  elasticsearch2:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.4.2
+    container_name: es74_02
+    environment:
+      - cluster.name=geektime
+      - node.name=es74_02
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - discovery.seed_hosts=es74_01,es74_02
+      #- network.publish_host=elasticsearch
+      - cluster.initial_master_nodes=es74_01,es74_02
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - es74data2:/usr/share/elasticsearch/data
+    ports:
+      - 9201:9200
+    networks:
+      - es74net
+
+
+volumes:
+  es74data1:
+    driver: local
+  es74data2:
+    driver: local
+
+networks:
+  es74net:
+    driver: bridge
