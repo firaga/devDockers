@@ -1,0 +1,11 @@
+version: '2'
+networks:
+  mynet:
+
+services:
+  linuxservice:
+    image: oraclelinux
+    #container_name: linuxservice.example.com
+    command: sleep 5000
+    networks:
+        - mynet 
