@@ -1,6 +1,11 @@
-FROM golang:1.17-alpine
+FROM golang:1.17-alpine AS build
+
 RUN mkdir /app
 COPY . /app
 WORKDIR /app
-RUN go build -o main .
-CMD ["/app/main"]
+RUN CGO_ENABLED=0 GOOS=linux go build -o myapp
+
+###
+FROM alpine:latest as final
+COPY --from=build /app/myapp .
+CMD ["/myapp"]
